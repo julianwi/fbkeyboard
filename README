@@ -8,8 +8,9 @@ How to build:
 just run make in this directory
 
 How to run:
-./fbkeyboard inputdevice [font]
-inputdevice has to be the device node of the touchscreen, eg: /dev/input/event1
+./fbkeyboard [-d inputdevice] [-f font]
+inputdevice has to be the device node of the touchscreen, eg: /dev/input/event1.
+If no inputdevice was given, the first device in /dev/input with absolute axes support will be used.
 font has to be a ttf file. If no font was given, "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf" will be used.
 
 usefull tips:

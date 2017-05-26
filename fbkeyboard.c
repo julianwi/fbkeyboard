@@ -20,6 +20,8 @@ Copyright 2017 Julian Winkler <julia.winkler1@web.de>
 #include <stdlib.h>
 #include <fcntl.h>
 #include <string.h>
+#include <unistd.h>
+#include <dirent.h>
 #include <linux/fb.h>
 #include <linux/input.h>
 #include <linux/uinput.h>
@@ -27,6 +29,7 @@ Copyright 2017 Julian Winkler <julia.winkler1@web.de>
 #include FT_FREETYPE_H
 
 char *font = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
+char *device = NULL;
 char *layout[] = {"qwertyuiopasdfghjklzxcvbnm/.",
                   "QWERTYUIOPASDFGHJKLZXCVBNM?>",
                   "1234567890-={};\'\\,./      /.",
@@ -99,12 +102,23 @@ int main(int argc, char *argv[]) {
   FT_Library library;
   int absolute_x, absolute_y, touchdown, pressed=-1, released, key;
 
-  if(argc<2) {
-    printf("usage: %s inputdevice [font]\n", argv[0]);
-    exit(0);
-  }
-  if(argc>2) {
-    font = argv[2];
+  char c;
+  while((c = getopt(argc, argv, "d:f:h")) != -1) {
+    switch (c) {
+      case 'd':
+        device = optarg;
+        break;
+      case 'f':
+        font = optarg;
+        break;
+      case 'h':
+        printf("usage: %s [options]\npossible options are:\n -h: print this help\n -d: set path to inputdevice\n -f: set path to font\n", argv[0]);
+        exit(0);
+        break;
+      case '?':
+        fprintf(stderr, "unrecognized option -%c\n", optopt);
+        break;
+    }
   }
 
   fbfd = open("/dev/fb0", O_RDWR);
@@ -135,9 +149,28 @@ int main(int argc, char *argv[]) {
     exit(-1);
   }
 
-  if ((fdinput = open(argv[1], O_RDONLY)) == -1) {
-    perror("failed to open input device node");
-    exit(-1);
+  if(device) {
+    if ((fdinput = open(device, O_RDONLY)) == -1) {
+      perror("failed to open input device node");
+      exit(-1);
+    }
+  }
+  else {
+    DIR *inputdevs = opendir("/dev/input");
+    struct dirent *dptr;
+    fdinput = -1;
+    while(dptr = readdir(inputdevs)) {
+      if((fdinput=openat(dirfd(inputdevs), dptr->d_name, O_RDONLY)) != -1 && ioctl(fdinput, EVIOCGBIT(0, sizeof(key)), &key) != -1 && key>>EV_ABS & 1)
+        break;
+      if(fdinput != -1){
+        close(fdinput);
+        fdinput = -1;
+      }
+    }
+    if(fdinput == -1) {
+      fprintf(stderr, "no absolute axes device found in /dev/input\n");
+      exit(-1);
+    }
   }
   if(ioctl (fdinput, EVIOCGABS (ABS_MT_POSITION_X), &abs_x) == -1)
     perror("error: getting touchscreen size");
