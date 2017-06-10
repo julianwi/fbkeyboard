@@ -1,0 +1,31 @@
+.TH FBKEYBOARD 1 "JUNE 2017" FBKEYBOARD "User Manuals"
+.SH NAME
+fbkeyboard \- on screen keyboard for fbdev
+.SH SYNOPSIS
+.B fbkeyboard
+[\fB\-d\fR \fIinputdevice\fR]
+[\fB\-f\fR \fIfont\fR]
+.SH DESCRIPTION
+This is a framebuffer softkeyboard for use on devices with
+touchscreen input like smartphones. It can be used on the linux
+text console. Before running \fBfbkeyboard\fR, use stty to reduce
+the console size to avoid overlapping the console and the keyboard.
+.PP
+.B stty
+rows \fInumber-of-rows
+
+.SH OPTIONS
+.TP
+.B \-d\fR \fIinputdevice\fR
+inputdevice has to be the device node of the touchscreen,
+eg: /dev/input/event1. If no inputdevice was given, the first
+device in /dev/input with absolute axes support will be used.
+.TP
+.B \-f\fR \fIfont\fR
+font has to be a ttf file. If no font was given,
+"/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf" will be used.
+.SH AUTHOR
+Julian Winkler
+.SH SEE ALSO
+.BR stty (1)
+
