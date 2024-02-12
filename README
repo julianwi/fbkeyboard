@@ -14,6 +14,6 @@ If no inputdevice was given, the first device in /dev/input with absolute axes s
 font has to be a ttf file. If no font was given, "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf" will be used.
 
 usefull tips:
-use stty to adjust the console size to avoid overlapping the console and the kayboard.
+use stty to adjust the console size to avoid overlapping the console and the keyboard.
 stty rows <number-of-rows>
 
